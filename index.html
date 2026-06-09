@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>مینی‌اپ بله | شبیه تلگرام</title>
+    <style>
+        /* ----- متغیرهای رنگی شبیه به تم تلگرام ----- */
+        :root {
+            --tg-bg-color: #ffffff;
+            --tg-text-color: #000000;
+            --tg-hint-color: #999999;
+            --tg-link-color: #2481cc;
+            --tg-button-color: #40a7e3;
+            --tg-button-text-color: #ffffff;
+            --tg-secondary-bg-color: #efeff4;
+            --tg-header-bg-color: #ffffff;
+        }
+        /* تم تاریک (دارک مود) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tg-bg-color: #0a0a0a;
+                --tg-text-color: #ffffff;
+                --tg-hint-color: #aaaaaa;
+                --tg-link-color: #6ab3f3;
+                --tg-button-color: #2c6b8f;
+                --tg-button-text-color: #ffffff;
+                --tg-secondary-bg-color: #1f1f1f;
+                --tg-header-bg-color: #1f1f1f;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Vazir', Helvetica, Arial, sans-serif;
+            background-color: var(--tg-bg-color);
+            color: var(--tg-text-color);
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        /* هدر شبیه به اپلیکیشن بله و تلگرام */
+        .app-header {
+            background-color: var(--tg-header-bg-color);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background-color: var(--tg-button-color);
+            color: var(--tg-button-text-color);
+            border: none;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* بخش اصلی برنامه */
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* باکس اطلاعات کاربر */
+        .user-info-card {
+            background-color: var(--tg-secondary-bg-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* المان‌های لیست مثل منوی تنظیمات */
+        .list-item {
+            background-color: var(--tg-secondary-bg-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .list-item:active {
+            transform: scale(0.99);
+        }
+
+        .list-item .emoji {
+            font-size: 1.8rem;
+        }
+
+        .list-item .text {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .list-item .arrow {
+            color: var(--tg-hint-color);
+            font-size: 1.2rem;
+        }
+
+        /* دکمه اکشن بزرگ */
+        .action-button {
+            background-color: var(--tg-button-color);
+            color: var(--tg-button-text-color);
+            border: none;
+            border-radius: 60px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .action-button:active {
+            opacity: 0.8;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: var(--tg-hint-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1>🚀 مینی‌اپ تست</h1>
+        <button class="close-btn" onclick="closeWebApp()">✖ بستن</button>
+    </div>
+
+    <div class="container">
+        <div class="user-info-card" id="userInfoBox">
+            در حال دریافت اطلاعات کاربر...
+        </div>
+
+        <div class="list-item" onclick="showAlert('نمایش پیام تست')">
+            <div class="emoji">📢</div>
+            <div class="text">ارسال پیام تستی</div>
+            <div class="arrow">›</div>
+        </div>
+
+        <div class="list-item" onclick="copyDebugInfo()">
+            <div class="emoji">🔧</div>
+            <div class="text">کپی اطلاعات محیط</div>
+            <div class="arrow">›</div>
+        </div>
+
+        <button class="action-button" onclick="sendTestRequest()">
+            📱 درخواست تست API
+        </button>
+
+        <div class="footer-note">
+            ⚡ این مینی‌اپ با ظاهر شبیه به تلگرام و بله طراحی شده است.
+        </div>
+    </div>
+
+    <script>
+        // دریافت اطلاعات کاربر (در صورت وجود WebApp SDK)
+        function getUserInfo() {
+            const infoDiv = document.getElementById('userInfoBox');
+            
+            // بررسی وجود WebApp در پنجره (مخصوص بله و تلگرام)
+            if (window.TelegramWebApp) {
+                // پشتیبانی از WebApp استاندارد تلگرام
+                const webApp = window.TelegramWebApp;
+                webApp.ready();
+                const user = webApp.initDataUnsafe?.user;
+                if (user) {
+                    infoDiv.innerHTML = `
+                        👤 <strong>${user.first_name || ''} ${user.last_name || ''}</strong><br>
+                        🆔 آیدی: ${user.id || 'نامشخص'}<br>
+                        🌓 تم: ${webApp.colorScheme === 'dark' ? 'تاریک' : 'روشن'}
+                    `;
+                    return;
+                }
+            } 
+            
+            if (window.BaleWebApp) {
+                // پشتیبانی از WebApp بله (در صورت وجود)
+                const webApp = window.BaleWebApp;
+                webApp.ready();
+                const user = webApp.initDataUnsafe?.user;
+                if (user) {
+                    infoDiv.innerHTML = `
+                        👤 <strong>${user.first_name || ''} ${user.last_name || ''}</strong><br>
+                        🆔 آیدی: ${user.id || 'نامشخص'}<br>
+                        📱 پلتفرم: بله
+                    `;
+                    return;
+                }
+            }
+            
+            // حالت نمایش دمو (برای تست در مرورگر)
+            infoDiv.innerHTML = `
+                🧪 <strong>حالت تست آفلاین</strong><br>
+                این صفحه در داخل اپلیکیشن بله، اطلاعات کاربر واقعی را نشان خواهد داد.
+            `;
+        }
+        
+        // بستن مینی‌اپ
+        function closeWebApp() {
+            if (window.TelegramWebApp) {
+                window.TelegramWebApp.close();
+            } else if (window.BaleWebApp) {
+                window.BaleWebApp.close();
+            } else {
+                alert('برای بستن از دکمه بازگشت در اپ استفاده کنید.');
+            }
+        }
+        
+        // نمایش هشدار
+        function showAlert(msg) {
+            alert(msg);
+        }
+        
+        // کپی اطلاعات دیباگ
+        function copyDebugInfo() {
+            let info = 'User Agent: ' + navigator.userAgent + '\n';
+            info += 'Screen Size: ' + screen.width + 'x' + screen.height + '\n';
+            info += 'Color Scheme: ' + (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            navigator.clipboard.writeText(info).then(() => {
+                alert('✅ اطلاعات محیط کپی شد!');
+            }).catch(() => {
+                alert('❌ خطا در کپی');
+            });
+        }
+        
+        // درخواست تست (می‌توانید این تابع را به API خود متصل کنید)
+        function sendTestRequest() {
+            alert('در این نسخه آزمایشی، درخواست شما به API اصلی ارسال نمی‌شود.\n\nبرای اتصال به سرور واقعی، کد را مطابق مستندات API خود تنظیم کنید.');
+        }
+        
+        // بارگذاری اطلاعات کاربر هنگام لود صفحه
+        window.addEventListener('DOMContentLoaded', () => {
+            getUserInfo();
+        });
+    </script>
+</body>
+</html>
